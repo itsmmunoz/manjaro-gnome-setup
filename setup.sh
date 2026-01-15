@@ -20,6 +20,15 @@ gsettings set org.gnome.desktop.wm.preferences button-layout ':close'
 
 gsettings set org.gnome.desktop.interface show-battery-percentage true
 
+# config dash-to-dock
+gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true 
+
+gsettings set org.gnome.shell.extensions.dash-to-dock custom-background-color true
+
+gsettings set org.gnome.shell.extensions.dash-to-dock background-color 'rgb(0,0,0)'
+
+gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.4
+
 gsettings set org.gnome.shell.extensions.dash-to-dock show-trash true
 
 gsettings set org.gnome.shell.extensions.dash-to-dock show-show-apps-button false
