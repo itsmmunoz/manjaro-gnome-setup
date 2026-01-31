@@ -12,8 +12,6 @@ xdg-open https://extensions.gnome.org/extension/3193/blur-my-shell/
 
 
 info "GNOME settings"
-gnome-extensions enable forge@jmmaranan.com
-
 gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
 
 gsettings set org.gnome.desktop.wm.preferences button-layout ':close'
@@ -32,6 +30,13 @@ gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.4
 gsettings set org.gnome.shell.extensions.dash-to-dock show-trash true
 
 gsettings set org.gnome.shell.extensions.dash-to-dock show-show-apps-button false
+
+# config forge
+gnome-extensions enable forge@jmmaranan.com
+
+gsettings set org.gnome.shell.extensions.forge focus-on-hover-enabled true
+
+gsettings set org.gnome.shell.extensions.forge focus-border-color 'rgba(236, 94, 94, 1)'
 
 
 info "Configure pamac (AUR + Flatpak + keep builds)"
