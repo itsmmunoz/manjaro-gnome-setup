@@ -58,6 +58,11 @@ PKGS=(
 
 sudo pamac remove --no-confirm $(pacman -Qq "${PKGS[@]}" 2>/dev/null) || true
 
+# install warp-terminal
+sudo sh -c "echo -e '\n[warpdotdev]\nServer = https://releases.warp.dev/linux/pacman/\$repo/\$arch' >> /etc/pacman.conf"
+sudo pacman-key -r "linux-maintainers@warp.dev"
+sudo pacman-key --lsign-key "linux-maintainers@warp.dev"
+sudo pacman -Sy warp-terminal
 
 
 
