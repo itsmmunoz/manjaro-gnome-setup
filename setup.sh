@@ -1,68 +1,151 @@
 #!/bin/bash
 
-info() { 
-  echo -e "\e[1;34m[INFO]\e[0m $1" 
+set -e
+
+LOG="$HOME/postinstall.log"
+exec > >(tee -a "$LOG") 2>&1
+
+info() {
+  echo -e "\e[1;34m[INFO]\e[0m $1"
 }
 
-info "Open GNOME extensions"
+warn() {
+  echo -e "\e[1;33m[WARN]\e[0m $1"
+}
+
+sudo -v
+
+###############################################################################
+info "Configure pamac (Enable AUR, Flatpak, Keep builds)"
+###############################################################################
+sudo sed -i 's/^#EnableAUR/EnableAUR/' /etc/pamac.conf
+sudo sed -i 's/^#CheckAURUpdates/CheckAURUpdates/' /etc/pamac.conf
+sudo sed -i 's/^#EnableFlatpak/EnableFlatpak/' /etc/pamac.conf
+sudo sed -i 's/^#CheckFlatpakUpdates/CheckFlatpakUpdates/' /etc/pamac.conf
+sudo sed -i 's/^#KeepBuiltPkgs/KeepBuiltPkgs/' /etc/pamac.conf
+
+
+###############################################################################
+info "Remove default GNOME apps"
+###############################################################################
+PKGS=(
+  gnome-calendar
+  gnome-contacts
+  gnome-maps
+  gnome-weather
+  gnome-clocks
+  gnome-tour
+  endeavour
+  gnome-chess
+  gnome-mines
+  iagno
+  malcontent
+  quadrapassel
+  htop
+  micro
+)
+
+TO_REMOVE=()
+
+for pkg in "${PKGS[@]}"; do
+  if pacman -Q "$pkg" &>/dev/null; then
+    TO_REMOVE+=("$pkg")
+  fi
+done
+
+if [ ${#TO_REMOVE[@]} -gt 0 ]; then
+  sudo pamac remove --no-confirm "${TO_REMOVE[@]}"
+else
+  warn "No packages to remove"
+fi
+
+
+###############################################################################
+info "Open GNOME extensions for manual install"
+###############################################################################
 xdg-open https://extensions.gnome.org/extension/517/caffeine/
 xdg-open https://extensions.gnome.org/extension/779/clipboard-indicator/
 xdg-open https://extensions.gnome.org/extension/4167/custom-hot-corners-extended/
 xdg-open https://extensions.gnome.org/extension/3193/blur-my-shell/
 
 
-info "GNOME settings"
-gsettings set org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
+###############################################################################
+info "GNOME configuration"
+###############################################################################
+set_if_exists() {
 
-gsettings set org.gnome.desktop.wm.preferences button-layout ':close'
+  schema="$1"
+  key="$2"
+  value="$3"
 
-gsettings set org.gnome.desktop.interface show-battery-percentage true
+  if gsettings writable "$schema" "$key" >/dev/null 2>&1; then
 
-# config dash-to-dock
-gsettings set org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true 
+    gsettings set "$schema" "$key" "$value"
 
-gsettings set org.gnome.shell.extensions.dash-to-dock custom-background-color true
+  else
 
-gsettings set org.gnome.shell.extensions.dash-to-dock background-color 'rgb(0,0,0)'
+    warn "$schema::$key not available"
 
-gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.4
+  fi
+}
 
-gsettings set org.gnome.shell.extensions.dash-to-dock show-trash true
+enable_extension() {
 
-gsettings set org.gnome.shell.extensions.dash-to-dock show-show-apps-button false
+  EXT="$1"
 
-# config forge
-gnome-extensions enable forge@jmmaranan.com
+  if gnome-extensions list | grep -q "$EXT"; then
 
-gsettings set org.gnome.shell.extensions.forge focus-on-hover-enabled true
+    gnome-extensions enable "$EXT"
 
-gsettings set org.gnome.shell.extensions.forge focus-border-color 'rgba(236, 94, 94, 1)'
+  else
 
+    warn "Extension $EXT not installed"
 
-info "Configure pamac (AUR + Flatpak + keep builds)"
-sudo sed -i \
-  -e 's/^#EnableAUR/EnableAUR/' \
-  -e 's/^#CheckAURUpdates/CheckAURUpdates/' \
-  -e 's/^#EnableFlatpak/EnableFlatpak/' \
-  -e 's/^#CheckFlatpakUpdates/CheckFlatpakUpdates/' \
-  -e 's/^#KeepBuiltPkgs/KeepBuiltPkgs/' \
-  /etc/pamac.conf
+  fi
+}
 
 
-info "Remove default apps"
-PKGS=(
-  gnome-calendar gnome-contacts gnome-maps gnome-weather gnome-clocks
-  gnome-tour endeavour gnome-chess gnome-mines iagno malcontent
-  quadrapassel htop micro
-)
+# interface
 
-sudo pamac remove --no-confirm $(pacman -Qq "${PKGS[@]}" 2>/dev/null) || true
+set_if_exists org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
 
-# install warp-terminal
-sudo sh -c "echo -e '\n[warpdotdev]\nServer = https://releases.warp.dev/linux/pacman/\$repo/\$arch' >> /etc/pacman.conf"
-sudo pacman-key -r "linux-maintainers@warp.dev"
-sudo pacman-key --lsign-key "linux-maintainers@warp.dev"
-sudo pacman -Sy warp-terminal
+set_if_exists org.gnome.desktop.wm.preferences button-layout ':close'
+
+set_if_exists org.gnome.desktop.interface show-battery-percentage true
 
 
+# dash to dock
 
+set_if_exists org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
+
+set_if_exists org.gnome.shell.extensions.dash-to-dock custom-background-color true
+
+set_if_exists org.gnome.shell.extensions.dash-to-dock background-color "'rgb(0,0,0)'"
+
+set_if_exists org.gnome.shell.extensions.dash-to-dock background-opacity 0.4
+
+set_if_exists org.gnome.shell.extensions.dash-to-dock show-trash true
+
+set_if_exists org.gnome.shell.extensions.dash-to-dock show-show-apps-button false
+
+
+# forge
+
+enable_extension forge@jmmaranan.com
+
+set_if_exists org.gnome.shell.extensions.forge focus-on-hover-enabled true
+
+set_if_exists org.gnome.shell.extensions.forge focus-border-color "'rgba(236, 94, 94, 1)'"
+
+
+###############################################################################
+info "Updating system"
+###############################################################################
+
+sudo pamac update --no-confirm
+
+
+###############################################################################
+info "Post install finished"
+info "Log saved at $LOG"
+###############################################################################
