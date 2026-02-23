@@ -18,7 +18,6 @@ sudo -v
 ###############################################################################
 info "Install Warp Terminal"
 ###############################################################################
-
 if ! grep -q "warpdotdev" /etc/pacman.conf; then
   sudo sh -c "echo -e '\n[warpdotdev]\nServer = https://releases.warp.dev/linux/pacman/\$repo/\$arch' >> /etc/pacman.conf"
   sudo pacman-key -r "linux-maintainers@warp.dev"
@@ -32,7 +31,6 @@ fi
 ###############################################################################
 info "Install CLI Packages"
 ###############################################################################
-
 CLI_PKGS=(
   fastfetch
   btop
@@ -49,7 +47,6 @@ sudo pamac install --no-confirm "${CLI_PKGS[@]}"
 ###############################################################################
 info "Install NVM + Node"
 ###############################################################################
-
 if [ ! -d "$HOME/.nvm" ]; then
 
   curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
@@ -71,7 +68,6 @@ npm install -g \
 ###############################################################################
 info "Install PHP + Composer"
 ###############################################################################
-
 if ! command -v php &>/dev/null; then
 
   /bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.4)"
@@ -82,7 +78,6 @@ fi
 ###############################################################################
 info "Install Docker"
 ###############################################################################
-
 DOCKER_PKGS=(
   docker
   docker-compose
@@ -103,7 +98,6 @@ sudo chmod 666 /var/run/docker.sock || true
 ###############################################################################
 info "Install Desktop Apps"
 ###############################################################################
-
 DESKTOP_PKGS=(
   visual-studio-code-bin
   stacer-bin

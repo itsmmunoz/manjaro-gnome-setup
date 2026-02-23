@@ -106,7 +106,6 @@ enable_extension() {
 
 
 # interface
-
 set_if_exists org.gnome.mutter experimental-features "['scale-monitor-framebuffer']"
 
 set_if_exists org.gnome.desktop.wm.preferences button-layout ':close'
@@ -115,7 +114,6 @@ set_if_exists org.gnome.desktop.interface show-battery-percentage true
 
 
 # dash to dock
-
 set_if_exists org.gnome.shell.extensions.dash-to-dock custom-theme-shrink true
 
 set_if_exists org.gnome.shell.extensions.dash-to-dock custom-background-color true
@@ -130,7 +128,6 @@ set_if_exists org.gnome.shell.extensions.dash-to-dock show-show-apps-button fals
 
 
 # forge
-
 enable_extension forge@jmmaranan.com
 
 set_if_exists org.gnome.shell.extensions.forge focus-on-hover-enabled true
@@ -141,7 +138,6 @@ set_if_exists org.gnome.shell.extensions.forge focus-border-color "'rgba(236, 94
 ###############################################################################
 info "Updating system"
 ###############################################################################
-
 sudo pamac update --no-confirm
 
 
