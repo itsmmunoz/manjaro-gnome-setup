@@ -16,19 +16,6 @@ warn() {
 sudo -v
 
 ###############################################################################
-info "Install Warp Terminal"
-###############################################################################
-if ! grep -q "warpdotdev" /etc/pacman.conf; then
-  sudo sh -c "echo -e '\n[warpdotdev]\nServer = https://releases.warp.dev/linux/pacman/\$repo/\$arch' >> /etc/pacman.conf"
-  sudo pacman-key -r "linux-maintainers@warp.dev"
-  sudo pacman-key --lsign-key "linux-maintainers@warp.dev"
-  sudo pacman -Sy --noconfirm warp-terminal
-else
-  warn "Warp repo already exists"
-fi
-
-
-###############################################################################
 info "Install CLI Packages"
 ###############################################################################
 CLI_PKGS=(
@@ -58,11 +45,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
 nvm install 24
-nvm use 24
 
-npm install -g \
-  git-cz \
-  @google/gemini-cli
+corepack enable pnpm
+
 
 
 ###############################################################################
